@@ -5,12 +5,14 @@
     <META NAME="description" CONTENT="An instant real-time multiplayer-only keyboard-crowding classic, this game pits up to four human-operated cute fuzzy widdle bunnies against each other for one goal only: lagomorphic cranial domination.">
     <link rel="shortcut icon" href="rabbit.ico" />
     <style type="text/css">
-        body, html { width: 100%; height: 100%; margin: 0; padding:0; overflow:hidden; }
+        body, html { width: 100%; height: 100%; margin: 0; padding:0; }
         canvas { margin:auto; border: 0px solid black; }
         img { float:right; }
         br { clear: both; }
         body { color: #cccccc; background-color: black}
         a { color: #bbbbbb; }
+        .noscrollbar { overflow:hidden; }
+        .pause { min-width: 130px; }
         .resource { display:none; }
         .top-bar { margin: 0 auto; }
         .top-bar * { display: inline-block; text-align: center; }
@@ -22,15 +24,15 @@
         .canvas-container { text-align: center; }
     </style>
 </head>
-<body>
+<body data-bind="css: { noscrollbar: current_page() === Page.Game }">
     <img class="resource" id='level' src='levels/default/level.png' alt=""/>
     <img class="resource" id='mask' src='levels/default/mask.png' alt=""/>
     <img class="resource" id='objects' src='sprites/objects.png' alt=""/>
     <img class="resource" id='numbers' src='sprites/numbers.png' alt=""/>
     <img class="resource" id='rabbits' src='sprites/rabbit.png' alt=""/>
     <div data-bind="visible: current_page() !== Page.Instructions" class="top-bar">
-        <button data-bind="visible: current_page() === Page.Game, click: current_game().pause" >Pause game (P)</button>
-        <button data-bind="visible: current_page() === Page.Scores, click: current_game().unpause">Unpause game (P)</button>
+        <button class="pause" data-bind="visible: current_page() === Page.Game, click: current_game().pause" >Pause game (P)</button>
+        <button class="pause" data-bind="visible: current_page() === Page.Scores, click: current_game().unpause">Unpause game (P)</button>
         <ul>
             <li>F11: full screen</li>
             <li>M: toggle sound</li>
@@ -74,15 +76,15 @@
         <h2>Jump 'n' Bump</h2>
         <img src="jbcircle.png" alt="small preview of the game"/>
         <p>
-            This game is a HTML5 reimplementation of a <a href="https://github.com/fschulze/jumpnbump">open source</a> <a href="https://icculus.org/jumpnbump/">DOS classic</a>. As of July 2015, it is still in development.
-            Maybe you would like to take a look at the <a href="https://github.com/GrahamTheCoder/jump-n-bump">Source code</a>?
+            This game is a HTML5 reimplementation of a <a href="https://github.com/fschulze/jumpnbump">open source</a> <a href="https://icculus.org/jumpnbump/">DOS classic</a>. Maybe you would like to take a look at the <a href="https://github.com/GrahamTheCoder/jump-n-bump">Source code</a>?
         </p>
     </div>
     <div data-bind="visible: current_page() != Page.Game" class="centre-column">
         <button data-bind="click: restart, disabled: loading_level">Start new game</button>
         <h3>Load level:</h3>
-        <p>Load any of the levels found on <a href="http://www.brainchilddesign.com/games/jumpnbump/levels/levels1.html" target="_blank">Brainchild Design's website</a></p>
-        <input id="level_input" type="file" accept=".dat" data-bind="event: { change: load_level }" />
+        <select data-bind="options: availableLevels, optionsText: 'name', value: selected_custom_level, event: { change: on_level_change }"></select>
+        <p>Load any level found online, for example <a href="http://aiei.ch/linux/jumpnbump/?1" target="_blank">this repository</a></p>
+        <input id="level_input" type="file" accept=".dat" data-bind="event: { change: function() { load_level_from_file($element.value, $element.files[0]) } }" />
         <br />
     </div>
 <script type="text/javascript" src="jump-n-bump.js"></script></body>
