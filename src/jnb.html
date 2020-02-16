@@ -11,6 +11,7 @@
         br { clear: both; }
         body { color: #cccccc; background-color: black}
         a { color: #bbbbbb; }
+        .pause { min-width: 130px; }
         .resource { display:none; }
         .top-bar { margin: 0 auto; }
         .top-bar * { display: inline-block; text-align: center; }
@@ -29,8 +30,8 @@
     <img class="resource" id='numbers' src='sprites/numbers.png' alt=""/>
     <img class="resource" id='rabbits' src='sprites/rabbit.png' alt=""/>
     <div data-bind="visible: current_page() !== Page.Instructions" class="top-bar">
-        <button data-bind="visible: current_page() === Page.Game, click: current_game().pause" >Pause game (P)</button>
-        <button data-bind="visible: current_page() === Page.Scores, click: current_game().unpause">Unpause game (P)</button>
+        <button class="pause" data-bind="visible: current_page() === Page.Game, click: current_game().pause" >Pause game (P)</button>
+        <button class="pause" data-bind="visible: current_page() === Page.Scores, click: current_game().unpause">Unpause game (P)</button>
         <ul>
             <li>F11: full screen</li>
             <li>M: toggle sound</li>
@@ -74,14 +75,13 @@
         <h2>Jump 'n' Bump</h2>
         <img src="jbcircle.png" alt="small preview of the game"/>
         <p>
-            This game is a HTML5 reimplementation of a <a href="https://github.com/fschulze/jumpnbump">open source</a> <a href="https://icculus.org/jumpnbump/">DOS classic</a>. As of July 2015, it is still in development.
-            Maybe you would like to take a look at the <a href="https://github.com/GrahamTheCoder/jump-n-bump">Source code</a>?
+            This game is a HTML5 reimplementation of a <a href="https://github.com/fschulze/jumpnbump">open source</a> <a href="https://icculus.org/jumpnbump/">DOS classic</a>. Maybe you would like to take a look at the <a href="https://github.com/GrahamTheCoder/jump-n-bump">Source code</a>?
         </p>
     </div>
     <div data-bind="visible: current_page() != Page.Game" class="centre-column">
         <button data-bind="click: restart, disabled: loading_level">Start new game</button>
         <h3>Load level:</h3>
-        <p>Load any of the levels found on <a href="http://www.brainchilddesign.com/games/jumpnbump/levels/levels1.html" target="_blank">Brainchild Design's website</a></p>
+        <p>Load any level found online, for example <a href="http://aiei.ch/linux/jumpnbump/?1" target="_blank">this repository</a></p>
         <input id="level_input" type="file" accept=".dat" data-bind="event: { change: load_level }" />
         <br />
     </div>
