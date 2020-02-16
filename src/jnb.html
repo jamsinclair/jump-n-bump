@@ -5,12 +5,13 @@
     <META NAME="description" CONTENT="An instant real-time multiplayer-only keyboard-crowding classic, this game pits up to four human-operated cute fuzzy widdle bunnies against each other for one goal only: lagomorphic cranial domination.">
     <link rel="shortcut icon" href="rabbit.ico" />
     <style type="text/css">
-        body, html { width: 100%; height: 100%; margin: 0; padding:0; overflow:hidden; }
+        body, html { width: 100%; height: 100%; margin: 0; padding:0; }
         canvas { margin:auto; border: 0px solid black; }
         img { float:right; }
         br { clear: both; }
         body { color: #cccccc; background-color: black}
         a { color: #bbbbbb; }
+        .noscrollbar { overflow:hidden; }
         .pause { min-width: 130px; }
         .resource { display:none; }
         .top-bar { margin: 0 auto; }
@@ -23,7 +24,7 @@
         .canvas-container { text-align: center; }
     </style>
 </head>
-<body>
+<body data-bind="css: { noscrollbar: current_page() === Page.Game }">
     <img class="resource" id='level' src='levels/default/level.png' alt=""/>
     <img class="resource" id='mask' src='levels/default/mask.png' alt=""/>
     <img class="resource" id='objects' src='sprites/objects.png' alt=""/>
@@ -81,8 +82,9 @@
     <div data-bind="visible: current_page() != Page.Game" class="centre-column">
         <button data-bind="click: restart, disabled: loading_level">Start new game</button>
         <h3>Load level:</h3>
+        <select data-bind="options: availableLevels, optionsText: 'name', value: selected_custom_level, event: { change: on_level_change }"></select>
         <p>Load any level found online, for example <a href="http://aiei.ch/linux/jumpnbump/?1" target="_blank">this repository</a></p>
-        <input id="level_input" type="file" accept=".dat" data-bind="event: { change: load_level }" />
+        <input id="level_input" type="file" accept=".dat" data-bind="event: { change: function() { load_level_from_file($element.value, $element.files[0]) } }" />
         <br />
     </div>
 </body>

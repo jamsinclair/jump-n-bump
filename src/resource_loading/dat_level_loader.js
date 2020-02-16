@@ -9,18 +9,13 @@ export function Dat_Level_Loader() {
     this.flip = false;
     var dat_index;
     var datafile_buffer;
-    var PIXEL_WIDTH = 400, PIXEL_HEIGHT = 256, PALETTE_256_SIZE = 768;
+    const PIXEL_WIDTH = 400, PIXEL_HEIGHT = 256, PALETTE_256_SIZE = 768;
 
-    this.load = function (dat_filename) {
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            //TODO consider supporting gzipped files too
-            datafile_buffer = new Uint8Array(reader.result);
-            this.file_name = dat_filename;
-            dat_index = read_dat_index();
-            document.dispatchEvent(new Event(self.on_loaded_event_text));
-        }
-        reader.readAsArrayBuffer(dat_filename);
+    this.load = function(data) {
+        //TODO consider supporting gzipped files too
+        datafile_buffer = new Uint8Array(data);
+        dat_index = read_dat_index();
+        return this.read_level();
     }
 
     this.read_level = function() {

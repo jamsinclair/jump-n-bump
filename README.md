@@ -17,3 +17,9 @@ Play the game here: https://grahamthecoder.github.io/jump-n-bump/
 1. To rebuild whenever files change `npm run watch`
 1. Open `game/index.html` in a browser to play
 
+## Debugging
+
+To make the level selector work when running index.html, use firefox:
+* Goto about:config
+* Set privacy.file_unique_origin to false while testing to allow local CORS requests
+* Set back to true after you're done debugging for maximum privacy and security
