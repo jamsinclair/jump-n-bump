@@ -1,14 +1,10 @@
 # Jump n Bump ![Deploy to GitHub Pages](https://github.com/GrahamTheCoder/jump-n-bump/workflows/Deploy%20to%20GitHub%20Pages/badge.svg)
 
-HTML5 port of the [open source](https://github.com/fschulze/jumpnbump) [DOS classic](https://icculus.org/jumpnbump/) by [Brainchild Design](http://www.bitbliss.com)
+HTML5 port of the [open source](https://github.com/fschulze/jumpnbump) [DOS classic](https://icculus.org/jumpnbump/) originally created by Brainchild Design
 
 Play the game here: https://grahamthecoder.github.io/jump-n-bump/
 
 ![image](https://user-images.githubusercontent.com/2490482/74604912-8d1f4f80-50ba-11ea-8f66-f52eb0776077.png)
-
-## About
-
-
 
 ## Development
 
@@ -19,7 +15,7 @@ Play the game here: https://grahamthecoder.github.io/jump-n-bump/
 
 ## Debugging
 
-To make the level selector work when running index.html, use firefox:
+To make the level selector work locally when running index.html, use firefox:
 * Goto about:config
 * Set privacy.file_unique_origin to false while testing to allow local CORS requests
 * Set back to true after you're done debugging for maximum privacy and security
