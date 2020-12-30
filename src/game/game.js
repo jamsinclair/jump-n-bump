@@ -18,7 +18,6 @@ export function Game(movement, ai, animation, renderer, objects, key_pressed, le
         new Player(2, [100, 102, 104], is_server, rnd),
         new Player(3, [74, 76, 73], is_server, rnd)
         ];
-        player[3].ai = true;
     }
 
     function reset_level() {
