@@ -62,4 +62,9 @@ module.exports = {
   resolve: {
     extensions: ['.js'],
   },
+  // Enable dev server for local development
+  devServer: {
+    contentBase: path.join(__dirname, 'game'),
+    port: 9000
+  },
 };
