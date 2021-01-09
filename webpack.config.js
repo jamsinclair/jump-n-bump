@@ -3,7 +3,7 @@
 const path = require('path');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 // Constant with our paths
 const paths = {
@@ -23,7 +23,9 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: path.join(__dirname, 'src/jnb.html'),
     }),
-    new ExtractTextPlugin('style.bundle.css'), // CSS will be extracted to this bundle file
+    new MiniCssExtractPlugin({
+      filename: 'style.bundle.css' // CSS will be extracted to this bundle file
+    }), 
   ],
   // Loaders configuration
   // We are telling webpack to use "babel-loader" for .js and .jsx files
@@ -41,9 +43,10 @@ module.exports = {
       // which will write it to the file we defined above
       {
         test: /\.css$/,
-        loader: ExtractTextPlugin.extract({
-          use: 'css-loader',
-        }),
+        loader: [
+          MiniCssExtractPlugin.loader,
+          'css-loader'
+        ],
       },
       // File loader for image assets
       // We'll add only image extensions, but you can things like svgs, fonts and videos
