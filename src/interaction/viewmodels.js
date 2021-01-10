@@ -2,7 +2,7 @@
 
 import { create_default_level } from "../asset_data/default_levelmap";
 import { Dat_Level_Loader } from "../resource_loading/dat_level_loader";
-import { env, Game_Session } from "../interaction/game_session";
+import { Game_Session } from "../interaction/game_session";
 import { Scores_ViewModel } from "../interaction/scores_viewmodel";
 import ko from "knockout";
 import 'whatwg-fetch'
@@ -27,7 +27,7 @@ const CustomLevel = function(name, filename, load) {
 function ViewModel() {
     "use strict";
     var self = this;
-    this.Page = Enum({ Instructions: 0, Game: 1, Scores: 2 });
+    this.Page = Enum({ Instructions: 0, Game: 1, Scores: 2, Waiting_For_Players: 3 });
     this.loading_level = ko.observable(true);
     this.availableLevels = ko.observableArray([
         new CustomLevel("Original", "default", () => Promise.resolve(create_default_level())),
@@ -56,9 +56,41 @@ function ViewModel() {
         return new Scores_ViewModel(self.current_game().scores());
     });
 
+    // For network multiplayer
+    this.server_player_name = ko.observable('');
+    this.server_game_id = ko.pureComputed(function () {
+        return self.current_game().game_id();
+    });
+    this.server_network_players = ko.pureComputed(function () {
+        return self.current_game().net_info().map(info => info && info.name);
+    });
+    this.client_player_name = ko.observable('');
+    this.client_game_id = ko.observable('');
+    this.canStartNetworkGame = ko.pureComputed(function () {
+        return self.server_player_name() && !self.loading_level();
+    });
+
+    this.canJoinNetworkGame = ko.pureComputed(function () {
+        return self.client_player_name() && self.client_game_id() && !self.loading_level();
+    });
+
     this.restart = function () {
-        self.current_game(new Game_Session(self.current_level));
+        self.current_game(new Game_Session(self.current_level, true, false, null));
         self.current_game().start();
+    };
+
+    this.init_network_game = function () {
+        self.current_game(new Game_Session(self.current_level, true, true, null, self.server_player_name()));
+        self.current_game().init_network_game();
+    };
+
+    this.start_network_game = function () {
+        self.current_game().start_network_game();
+    };
+
+    this.join_network_game = function () {
+        self.current_game(new Game_Session(self.current_level, false, true, self.client_game_id(), self.client_player_name()));
+        self.current_game().wait_for_greenlight();
     };
 
     this.on_level_change = function() {

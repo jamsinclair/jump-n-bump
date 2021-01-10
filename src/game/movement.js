@@ -4,7 +4,7 @@ import { BAN_SOLID, BAN_SPRING, BAN_ICE, BAN_WATER, GET_BAN_MAP_XY, GET_BAN_MAP_
 import { Player_Pair } from "../game/player_pair";
 import { player } from "../game/game";
 
-export function Movement(renderer, img, sfx, objects, settings, rnd) {
+export function Movement(renderer, img, sfx, objects, settings, rnd, is_server) {
     "use strict";
 
     this.steer_player = function (p) {
@@ -226,7 +226,7 @@ export function Movement(renderer, img, sfx, objects, settings, rnd) {
         /* collision check */
         for (var c1 = 0; c1 < 3; c1++) {
             for (var c2 = c1 + 1; c2 < 4; c2++) {
-                var pair = new Player_Pair(player[c1], player[c2], sfx, renderer, objects, img, settings);
+                var pair = new Player_Pair(player[c1], player[c2], sfx, renderer, objects, img, settings, is_server);
                 pair.collision_check();
             }
         }

@@ -61,17 +61,15 @@ export function tellServerPlayerMoved (player_id, movement_type, new_val) {
 
   if (is_server) {
     processMovePacket(packet);
-    console.log("SERVER: processing move packet", packet);
     if (is_net) {
       sendPacketToAll(packet);
     }
   } else  {
-    console.log("CLIENT: telling server we moved", packet);
     sendPacketToSock(sock, packet);
   }
 }
 
-export function serverSendKillPacket (killer, victim) {
+export function serverSendKillPacket (killer, victim, bumps, bumped) {
   if (!is_server) {
     return;
   }
@@ -79,7 +77,9 @@ export function serverSendKillPacket (killer, victim) {
   const packet = {
     cmd: NETCMD.KILL,
     arg: killer,
-    arg2: victim
+    arg2: victim,
+    arg3: bumps,
+    arg4: bumped
   };
 
   processKillPacket(packet);
@@ -92,9 +92,15 @@ function processKillPacket (packet) {
   const {
     arg,
     arg2,
+    arg3,
+    arg4
   } = packet;
 
-  // @TODO handle player killed
+  const killer = player[arg];
+  const victim = player[arg2];
+
+  killer.bumps = arg3;
+  killer.bumped[victim.player_index] = arg4;
 }
 
 function sendPacketToSock (socket, packet) {

@@ -1,6 +1,7 @@
 import { number_gobs } from "../asset_data/number_gobs";
+import { serverSendKillPacket } from "../game/network";
 
-export function Player_Pair(first, second, sfx, renderer, objects, img, settings) {
+export function Player_Pair(first, second, sfx, renderer, objects, img, settings, is_server) {
     "use strict";
 
     this.highest = function () {
@@ -59,8 +60,9 @@ export function Player_Pair(first, second, sfx, renderer, objects, img, settings
 
     function player_kill(killer, victim) {
         killer.y.velocity = -killer.y.velocity;
-        if (killer.y.velocity > -262144)
+        if (killer.y.velocity > -262144) {
             killer.y.velocity = -262144;
+        }
         killer.jump_abort = true;
         victim.dead_flag = true;
         if (victim.anim != 6) {
@@ -69,13 +71,18 @@ export function Player_Pair(first, second, sfx, renderer, objects, img, settings
                 objects.add_gore(victim.x.pos, victim.y.pos, victim.player_index);
             }
             sfx.death();
-            killer.bumps++;
-            killer.bumped[victim.player_index]++;
+            if (is_server) {
+                killer.bumps++;
+                killer.bumped[victim.player_index]++;
+            }
             var s1 = killer.bumps % 100;
             if (s1 % 10 == 0) {
                 renderer.add_leftovers(360, 34 + killer.player_index * 64, img.numbers, number_gobs[Math.floor(s1 / 10) % 10]);
             }
             renderer.add_leftovers(376, 34 + killer.player_index * 64, img.numbers, number_gobs[s1 % 10]);
         }
+
+        // @todo need more consistent handling of kills between server and clients
+        serverSendKillPacket(killer.player_index, victim.player_index, killer.bumps, killer.bumped[victim.player_index]);
     }
 }

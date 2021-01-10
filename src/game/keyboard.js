@@ -1,4 +1,5 @@
 import { player } from "../game/game";
+import { env } from "../interaction/game_session";
 
 export function Keyboard(key_function_mappings) {
     "use strict";
@@ -24,6 +25,10 @@ export function Keyboard(key_function_mappings) {
         keys_pressed[evt.keyCode] = false;
         var uppercase_string = String.fromCharCode(evt.keyCode);
         if (evt.keyCode >= 49 && evt.keyCode <= 52) {
+            if (env.is_net) {
+                // do not allow toggling of players in network games
+                return;
+            }
             var i = evt.keyCode - 49;
             if (evt.altKey) toggle_ai_enabled(i);
             else toggle_player_enabled(i);

@@ -2,6 +2,7 @@ import { env } from "../interaction/game_session";
 import { BAN_SOLID, BAN_VOID, BAN_ICE, GET_BAN_MAP } from "../game/level";
 import { LEVEL_HEIGHT, LEVEL_WIDTH, LEVEL_SCALE_FACTOR } from "../asset_data/default_levelmap";
 import { player } from "../game/game";
+import { serverSendAlive } from "./network";
 
 export function Player(playerIndex, keys, is_server, rnd) {
     "use strict";
@@ -50,6 +51,11 @@ export function Player(playerIndex, keys, is_server, rnd) {
         var c1;
         var s1, s2;
 
+        if (!is_server && env.is_net) {
+            // Do not position players in network clients, let server handle
+            return;
+        }
+
         while (1) {
             while (1) {
                 s1 = rnd(LEVEL_WIDTH);
@@ -73,12 +79,14 @@ export function Player(playerIndex, keys, is_server, rnd) {
                 player[player_num].set_anim(0);
 
                 if (is_server) {
+                    if (env.is_net) {
+                        serverSendAlive(player_num);
+                    }
                     player[player_num].dead_flag = 0;
                 }
 
                 break;
             }
         }
-
     };
 };

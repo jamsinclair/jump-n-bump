@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Jump n Bump - HTML5</title>
-    <META NAME="description" CONTENT="An instant real-time multiplayer-only keyboard-crowding classic, this game pits up to four human-operated cute fuzzy widdle bunnies against each other for one goal only: lagomorphic cranial domination.">
+    <meta name="description" content="An instant real-time network-only keyboard-crowding classic, this game pits up to four human-operated cute fuzzy widdle bunnies against each other for one goal only: lagomorphic cranial domination.">
     <link rel="shortcut icon" href="rabbit.ico" />
     <style type="text/css">
         body, html { width: 100%; height: 100%; margin: 0; padding:0; }
@@ -79,13 +79,43 @@
             This game is a HTML5 reimplementation of a <a href="https://github.com/fschulze/jumpnbump">open source</a> <a href="https://icculus.org/jumpnbump/">DOS classic</a>. Maybe you would like to take a look at the <a href="https://github.com/GrahamTheCoder/jump-n-bump">Source code</a>?
         </p>
     </div>
-    <div data-bind="visible: current_page() != Page.Game" class="centre-column">
-        <button data-bind="click: restart, disabled: loading_level">Start new game</button>
+    <div data-bind="visible: (current_page() != Page.Game && current_page() != Page.Waiting_For_Players)" class="centre-column">
+        <button data-bind="click: restart, disable: loading_level">Start new local game</button>
+        <fieldset>
+            <input type="text" placeholder="Enter Player Name" data-bind="value: server_player_name, valueUpdate: 'keyup'" />
+            <button data-bind="click: init_network_game, enable: canStartNetworkGame()">Start online game</button>
+        </fieldset>
+        <fieldset>
+            <input type="text" placeholder="Enter Player Name" data-bind="value: client_player_name, valueUpdate: 'keyup'" />
+            <input type="text" placeholder="Enter Game ID" data-bind="value: client_game_id, valueUpdate: 'keyup'" />
+            <button data-bind="click: join_network_game, enable: canJoinNetworkGame()">Join online game</button>
+        </fieldset>
         <h3>Load level:</h3>
         <select data-bind="options: availableLevels, optionsText: 'name', value: selected_custom_level, event: { change: on_level_change }"></select>
         <p>Load any level found online, for example <a href="http://aiei.ch/linux/jumpnbump/?1" target="_blank">this repository</a></p>
         <input id="level_input" type="file" accept=".dat" data-bind="event: { change: function() { load_level_from_file($element.value, $element.files[0]) } }" />
         <br />
+    </div>
+    <div data-bind="if: (current_page() == Page.Waiting_For_Players && server_player_name())" class="centre-column">
+        <h2 data-bind="if: !server_game_id()">Preparing Game Server...</h2>
+        <div data-bind="if: server_game_id()">
+            <h2>Game Server Ready</h2>
+            <p>Your Game ID is <span style="font-weight: 700;" data-bind="text: server_game_id"></span>. Share with other players so they can connect!</p>
+            <ul data-bind="foreach: server_network_players">
+                <li>
+                    <span data-bind="if: $data">
+                        Player <span data-bind="text: $index() + 1"></span>: <span data-bind="text: $data"></span>
+                    </span>
+                    <span data-bind="if: !$data">
+                        Player <span data-bind="text: $index() + 1"></span> not assigned
+                    </span>
+                </li>
+            </ul>
+            <button data-bind="click: start_network_game">Start Game</button>
+        </div>
+    </div>
+    <div data-bind="if: (current_page() == Page.Waiting_For_Players && client_player_name())" class="centre-column">
+        <h2>Waiting for server to start game...</h2>
     </div>
 </body>
 </html>

@@ -8,24 +8,26 @@ import { Sound_Player } from "../resource_loading/sound_player";
 import { Sfx } from "../game/sfx";
 import { Movement } from "../game/movement";
 import { Game, player } from "../game/game";
-import { Scores_ViewModel } from "../interaction/scores_viewmodel";
+import { net_info } from "../game/network";
 import ko from "knockout";
 
 export const env = {
     JNB_MAX_PLAYERS: 4,
     MAX_OBJECTS: 200,
     animation_data: new Animation_Data(),
-    level: {}
+    level: {},
+    is_net: false
 };
 
 function Enum(obj) {
     return Object.freeze ? Object.freeze(obj) : obj;
 }
-var Game_State = Enum({ Not_Started: 0, Playing: 1, Paused: 2 });
+var Game_State = Enum({ Not_Started: 0, Playing: 1, Paused: 2, Waiting_For_Players: 3, });
 
-export function Game_Session(level) {
+export function Game_Session(level, is_server, is_net, game_id, player_name) {
     "use strict";
     var self = this;
+    env.is_net = false;
 
     function rnd(max_value) {
         return Math.floor(Math.random() * max_value);
@@ -69,11 +71,13 @@ export function Game_Session(level) {
     var animation = new Animation(renderer, img, objects, rnd);
     this.sound_player = new Sound_Player(muted);
     var sfx = new Sfx(this.sound_player);
-    var movement = new Movement(renderer, img, sfx, objects, settings, rnd);
-    var game = new Game(movement, ai, animation, renderer, objects, keyboard.key_pressed, level, true, rnd);
+    var movement = new Movement(renderer, img, sfx, objects, settings, rnd, is_server);
+    var game = new Game(movement, ai, animation, renderer, objects, keyboard.key_pressed, level, rnd, is_server, is_net, game_id, player_name);
 
     this.scores = ko.observable([[]]);
+    this.game_id = ko.observable('');
     this.game_state = ko.observable(Game_State.Not_Started);
+    this.net_info = net_info;
 
     this.pause = function () {
         self.game_state(Game_State.Paused);
@@ -89,6 +93,27 @@ export function Game_Session(level) {
     this.start = function () {
         sfx.music();
         self.unpause();
+    }
+
+    this.init_network_game = function () {
+        env.is_net = true;
+        self.game_state(Game_State.Waiting_For_Players);
+        game.init_network_game().then(assigned_game_id => {
+            if (assigned_game_id) {
+                self.game_id(assigned_game_id);
+            }
+        });
+    }
+
+    this.start_network_game = function () {
+        game.start_network_game();
+        self.start();
+    }
+
+    this.wait_for_greenlight = function () {
+        env.is_net = true;
+        self.game_state(Game_State.Waiting_For_Players);
+        game.wait_for_greenlight().then(self.start);
     }
 
     key_action_mappings["M"] = function () {

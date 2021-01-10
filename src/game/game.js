@@ -1,15 +1,25 @@
 import { env } from "../interaction/game_session";
-import { Player } from "../game/player";
-import { SET_BAN_MAP } from "../game/level";
+import { Player } from "./player";
+import { SET_BAN_MAP } from "./level";
+import * as network from "./network";
+
+export const player_action_cache = [];
+
+export const MOVEMENT = {
+    LEFT: 1,
+    RIGHT: 2,
+    UP: 3
+};
 
 export let player = [];
 
-export function Game(movement, ai, animation, renderer, objects, key_pressed, level, is_server, rnd) {
+export function Game(movement, ai, animation, renderer, objects, key_pressed, level, rnd, is_server, is_net, game_id, player_name) {
     "use strict";
     var next_time = 0;
     var playing = false;
     reset_players();
     reset_level();
+    network.reset_network();
 
     function reset_players() {
         player = [
@@ -18,6 +28,11 @@ export function Game(movement, ai, animation, renderer, objects, key_pressed, le
         new Player(2, [100, 102, 104], is_server, rnd),
         new Player(3, [74, 76, 73], is_server, rnd)
         ];
+
+        if (is_net) {
+            // When network game disable all players by default
+            player.forEach(player => player.enabled = 0);
+        }
     }
 
     function reset_level() {
@@ -40,10 +55,44 @@ export function Game(movement, ai, animation, renderer, objects, key_pressed, le
     }
 
     function update_player_actions() {
+        let tmp;
+
+        const isValidKeyPress = (player_id, value, action) => {
+            if (typeof value !== 'boolean') {
+                return false;
+            };
+
+            return value !== player[player_id][action] && value !== player_action_cache[player_id][action];
+        }
+
         for (var i = 0; i != player.length; ++i) {
-            player[i].action_left = key_pressed(player[i].keys[0]);
-            player[i].action_right = key_pressed(player[i].keys[1]);
-            player[i].action_up = key_pressed(player[i].keys[2]);
+            if (!player[i].enabled) {
+                continue;
+            }
+
+            if (env.is_net && !player[i].is_client_player) {
+                continue;
+            }
+
+            if (!player_action_cache[i]) {
+                player_action_cache[i] = {};
+            }
+
+            tmp = key_pressed(player[i].keys[0]);
+            if (isValidKeyPress(i, tmp, 'action_left')) {
+                player_action_cache[i].action_left = tmp;
+                network.tellServerPlayerMoved(i, MOVEMENT.LEFT, tmp);
+            }
+            tmp = key_pressed(player[i].keys[1]);
+            if (isValidKeyPress(i, tmp, 'action_right')) {
+                player_action_cache[i].action_right = tmp;
+                network.tellServerPlayerMoved(i, MOVEMENT.RIGHT, tmp);
+            }
+            tmp = key_pressed(player[i].keys[2]);
+            if (isValidKeyPress(i, tmp, 'action_up')) {
+                player_action_cache[i].action_up = tmp;
+                network.tellServerPlayerMoved(i, MOVEMENT.UP, tmp);
+            }
         }
     }
 
@@ -63,6 +112,14 @@ export function Game(movement, ai, animation, renderer, objects, key_pressed, le
 
 
     function game_iteration() {
+        if (is_net) {
+            if (is_server) {
+                network.update_players_from_clients();
+            } else {
+                network.update_players_from_server();
+            }
+        }
+
         steer_players();
         movement.collision_check();
         animation.update_object();
@@ -92,5 +149,27 @@ export function Game(movement, ai, animation, renderer, objects, key_pressed, le
 
     this.pause = function () {
         playing = false;
+    }
+
+    this.init_network_game = () => {
+        if (is_server && is_net) {
+            return network.init_server(player_name);
+        }
+
+        return Promise.reject(new Error('Invalid network game state'));
+    }
+
+    this.wait_for_greenlight = () => {
+        if (!is_server && is_net) {
+            return network.connect_to_server(game_id, player_name);
+        }
+        return Promise.reject(new Error('Invalid network game state'));
+    }
+
+    this.start_network_game = () => {
+        if (is_server && is_net) {
+            reset_level();
+            network.server_send_greenlight();
+        }
     }
 }
