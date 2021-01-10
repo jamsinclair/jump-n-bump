@@ -2,6 +2,8 @@ import { player } from "../game/game";
 import { env } from "../interaction/game_session";
 import { rabbit_gobs } from "../asset_data/rabbit_gobs";
 
+let topBarNode = null;
+
 export function Renderer(canvas, img, level) {
     "use strict";
     var main = { num_pobs: 0, pobs: [] };
@@ -55,8 +57,12 @@ export function Renderer(canvas, img, level) {
 
 
     function resize_canvas() {
+        if (!topBarNode) {
+            topBarNode = document.querySelector('.top-bar');
+        }
         var x_scale = window.innerWidth / level.image.width;
-        var y_scale = window.innerHeight / level.image.height;
+        // @todo refactor UI so topbar does not effect canvas height
+        var y_scale = (window.innerHeight - topBarNode.offsetHeight) / level.image.height;
         var new_scale = Math.floor(Math.min(x_scale, y_scale) * 10) / 10;
 
         if (canvas_scale != new_scale) {
