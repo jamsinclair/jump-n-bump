@@ -21,6 +21,7 @@ module.exports = {
   // Tell webpack to use html plugin
   plugins: [
     new HtmlWebpackPlugin({
+      minify: false,
       template: path.join(__dirname, 'src/jnb.html'),
     }),
     new MiniCssExtractPlugin({
