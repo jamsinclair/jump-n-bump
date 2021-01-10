@@ -80,9 +80,9 @@ export function Player_Pair(first, second, sfx, renderer, objects, img, settings
                 renderer.add_leftovers(360, 34 + killer.player_index * 64, img.numbers, number_gobs[Math.floor(s1 / 10) % 10]);
             }
             renderer.add_leftovers(376, 34 + killer.player_index * 64, img.numbers, number_gobs[s1 % 10]);
+            // @todo need more consistent handling of kills between server and clients
+            serverSendKillPacket(killer.player_index, victim.player_index, killer.bumps, killer.bumped[victim.player_index]);
         }
 
-        // @todo need more consistent handling of kills between server and clients
-        serverSendKillPacket(killer.player_index, victim.player_index, killer.bumps, killer.bumped[victim.player_index]);
     }
 }

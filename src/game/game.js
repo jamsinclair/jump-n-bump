@@ -40,11 +40,11 @@ export function Game(movement, ai, animation, renderer, objects, key_pressed, le
         objects.reset_objects();
 
         for (var c1 = 0; c1 < env.JNB_MAX_PLAYERS; c1++) {
+            player[c1].bumps = 0;
+            for (var c2 = 0; c2 < env.JNB_MAX_PLAYERS; c2++) {
+                player[c1].bumped[c2] = 0;
+            }
             if (player[c1].enabled) {
-                player[c1].bumps = 0;
-                for (var c2 = 0; c2 < env.JNB_MAX_PLAYERS; c2++) {
-                    player[c1].bumped[c2] = 0;
-                }
                 player[c1].position_player(c1);
             }
         }

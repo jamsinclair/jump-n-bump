@@ -97,10 +97,8 @@ function processKillPacket (packet) {
   } = packet;
 
   const killer = player[arg];
-  const victim = player[arg2];
-
   killer.bumps = arg3;
-  killer.bumped[victim.player_index] = arg4;
+  killer.bumped[arg2] = arg4;
 }
 
 function sendPacketToSock (socket, packet) {
