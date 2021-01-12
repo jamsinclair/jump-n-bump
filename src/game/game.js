@@ -58,11 +58,19 @@ export function Game(movement, ai, animation, renderer, objects, key_pressed, le
         let tmp;
 
         const isValidKeyPress = (player_id, value, action) => {
+            if (!player_action_cache[i]) {
+                player_action_cache[i] = {};
+            }
+
             if (typeof value !== 'boolean') {
                 return false;
             };
 
-            return value !== player[player_id][action] && value !== player_action_cache[player_id][action];
+            const valid = value !== player[player_id][action] && value !== player_action_cache[player_id][action];
+            if (valid) {
+                player_action_cache[player_id][action] = value;
+            }
+            return valid;
         }
 
         for (var i = 0; i != player.length; ++i) {
@@ -74,23 +82,19 @@ export function Game(movement, ai, animation, renderer, objects, key_pressed, le
                 continue;
             }
 
-            if (!player_action_cache[i]) {
-                player_action_cache[i] = {};
-            }
-
             tmp = key_pressed(player[i].keys[0]);
             if (isValidKeyPress(i, tmp, 'action_left')) {
-                player_action_cache[i].action_left = tmp;
+                player[i].action_left = tmp;
                 network.tellServerPlayerMoved(i, MOVEMENT.LEFT, tmp);
             }
             tmp = key_pressed(player[i].keys[1]);
             if (isValidKeyPress(i, tmp, 'action_right')) {
-                player_action_cache[i].action_right = tmp;
+                player[i].action_right = tmp;
                 network.tellServerPlayerMoved(i, MOVEMENT.RIGHT, tmp);
             }
             tmp = key_pressed(player[i].keys[2]);
             if (isValidKeyPress(i, tmp, 'action_up')) {
-                player_action_cache[i].action_up = tmp;
+                player[i].action_up = tmp;
                 network.tellServerPlayerMoved(i, MOVEMENT.UP, tmp);
             }
         }
@@ -124,6 +128,21 @@ export function Game(movement, ai, animation, renderer, objects, key_pressed, le
         movement.collision_check();
         animation.update_object();
         renderer.draw();
+
+        if (is_net) {
+            const currentPlayer = player.find(p => p.is_client_player);
+            if ( (currentPlayer.dead_flag == 0) &&
+                (
+                 (currentPlayer.action_left) ||
+                 (currentPlayer.action_right) ||
+                 (currentPlayer.action_up) ||
+                 (currentPlayer.jump_ready == 0)
+                )
+               ) {
+                console.log('telling server new position')
+                network.tellServerNewPosition();
+            }
+        }
     }
 
     function pump() {

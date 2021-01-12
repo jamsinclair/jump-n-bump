@@ -5,7 +5,7 @@ import ko from 'knockout';
 
 export const net_info = ko.observable([]);
 
-let log_count = 0;
+let LAG = 0;
 let buggered_off = 0;
 let is_server = 1;
 let is_net = 0;
@@ -46,8 +46,8 @@ function processMovePacket (packet) {
     console.warn('bogus movement_type in packet')
   }
 
-  player[player_id].x = arg3;
-  player[player_id].y = arg4;
+  // player[player_id].x.pos = arg3;
+  // player[player_id].y.pos = arg4;
 }
 
 export function tellServerPlayerMoved (player_id, movement_type, new_val) {
@@ -55,8 +55,8 @@ export function tellServerPlayerMoved (player_id, movement_type, new_val) {
     cmd: NETCMD.MOVE,
     arg: player_id,
     arg2: [movement_type, new_val],
-    arg3: player[player_id].x,
-    arg4: player[player_id].y
+    arg3: player[player_id].x.pos,
+    arg4: player[player_id].y.pos
   };
 
   if (is_server) {
@@ -65,7 +65,9 @@ export function tellServerPlayerMoved (player_id, movement_type, new_val) {
       sendPacketToAll(packet);
     }
   } else  {
-    sendPacketToSock(sock, packet);
+    setTimeout(() => {
+      sendPacketToSock(sock, packet);
+    }, (LAG));
   }
 }
 
@@ -102,6 +104,7 @@ function processKillPacket (packet) {
 }
 
 function sendPacketToSock (socket, packet) {
+    packet.timestamp = Date.now();
     socket && socket.send(packet);
 }
 
@@ -134,25 +137,27 @@ function tellServerGoodbye () {
   }
 }
 
-function tellServerNewPosition () {
+export function tellServerNewPosition () {
   const newPacket = {
     cmd: NETCMD.POSITION,
     arg: client_player_num,
-    arg2: player[client_player_num].x,
-    arg3: player[client_player_num].y
+    arg2: player[client_player_num].x.pos,
+    arg3: player[client_player_num].y.pos
   };
 
   if (is_server) {
     sendPacketToAll(newPacket);
   } else {
-    sendPacketToSock(socket, newPacket);
+    setTimeout(() => {
+      sendPacketToSock(sock, newPacket);
+    }, LAG);
   }
 }
 
 function processPositionPacket (packet) {
   const player_id = packet.arg;
-  player[player_id].x = packet.arg2;
-  player[player_id].y = packet.arg3;
+  player[player_id].x.pos = packet.arg2;
+  player[player_id].y.pos = packet.arg3;
 }
 
 function processAlivePacket (packet) {
@@ -259,7 +264,7 @@ export function update_players_from_clients () {
     _net_info[playerId].socketset.forEach(packet => {
       if (packet.cmd === NETCMD.POSITION) {
         processPositionPacket(packet);
-        for (i = 0; i < JNB_MAX_PLAYERS; i++) {
+        for (i = 0; i < env.JNB_MAX_PLAYERS; i++) {
           if (i != playerId) {
             sendPacket(i, packet);
           }
@@ -279,7 +284,7 @@ export function update_players_from_clients () {
 
 function init_server_peer () {
   return new Promise((resolve) => {
-    peer = new Peer(null, { debug: 2 });
+    peer = new Peer('jamie-test-123', { debug: 2 });
     
     peer.on('open', (conn) => {
       const newNetInfo = net_info();
@@ -478,7 +483,9 @@ export async function connect_to_server (server_id, player_name) {
 
     sock.on('data', (packet) => {
       if (receivedAck && receivedGreenlight) {
-        socketset.push(packet);
+        setTimeout(() => {
+          socketset.push(packet);
+        }, (LAG));
         return;
       }
 
