@@ -286,7 +286,7 @@ export function update_players_from_clients () {
 
 function init_server_peer () {
   return new Promise((resolve) => {
-    peer = new Peer('jamie-test-123', { debug: 2 });
+    peer = new Peer('jamie-test-1234', { debug: 2, host: '9000-ced39531-3538-4acb-bb67-6f32c5d165a5.ws-eu03.gitpod.io' });
     
     peer.on('open', (conn) => {
       const newNetInfo = net_info();
@@ -396,7 +396,7 @@ function init_server_peer () {
 
 function init_client_peer () {
   return new Promise((resolve) => {
-    peer = new Peer(null, { debug: 2 });
+    peer = new Peer(null, { debug: 2, host: '9000-ced39531-3538-4acb-bb67-6f32c5d165a5.ws-eu03.gitpod.io' });
     
     peer.on('open', () => {
       // Workaround for peer.reconnect deleting previous id
