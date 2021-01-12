@@ -5,7 +5,7 @@ import ko from 'knockout';
 
 export const net_info = ko.observable([]);
 
-let LAG = 0;
+let LAG = 0; // change
 let buggered_off = 0;
 let is_server = 1;
 let is_net = 0;
