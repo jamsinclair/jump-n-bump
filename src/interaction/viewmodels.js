@@ -59,14 +59,14 @@ function ViewModel() {
     // For network multiplayer
     this.server_player_name = ko.observable('');
     this.server_game_id = ko.pureComputed(function () {
-        return 'jamie-test-123';
+        return 'jamie-test-1234';
         return self.current_game().game_id();
     });
     this.server_network_players = ko.pureComputed(function () {
-        return self.current_game().net_info().map(info => info && info.name);
+        return self.current_game().net_info().map(info => ({ name: info.name, ping: info.ping}));
     });
     this.client_player_name = ko.observable('');
-    this.client_game_id = ko.observable('jamie-test-123');
+    this.client_game_id = ko.observable('jamie-test-1234');
     this.canStartNetworkGame = ko.pureComputed(function () {
         return self.server_player_name() && !self.loading_level();
     });

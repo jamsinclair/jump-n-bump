@@ -47,6 +47,14 @@
     </div>
     <div data-bind="visible: current_page() === Page.Game" class="canvas-container">
         <canvas id="screen" width="1200" height="768"></canvas>
+        <div data-bind="if: server_player_name()">
+            <p data-bind="foreach: server_network_players">
+                <span data-bind="if: $data">
+                    Player <span data-bind="text: $index() + 1"></span>: <span data-bind="text: $data.name"></span>
+                    (Ping <span data-bind="text: $data.ping"></span>)
+                </span>
+            </p>
+        </div>
     </div>
     <div data-bind="visible: current_page() == Page.Scores" class="centre-column">
         <table data-bind="with: scores_viewmodel" class="scores">
@@ -104,7 +112,8 @@
             <ul data-bind="foreach: server_network_players">
                 <li>
                     <span data-bind="if: $data">
-                        Player <span data-bind="text: $index() + 1"></span>: <span data-bind="text: $data"></span>
+                        Player <span data-bind="text: $index() + 1"></span>: <span data-bind="text: $data.name"></span>
+                        (Ping <span data-bind="text: $data.ping"></span>)
                     </span>
                     <span data-bind="if: !$data">
                         Player <span data-bind="text: $index() + 1"></span> not assigned

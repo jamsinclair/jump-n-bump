@@ -26,7 +26,9 @@ const NETCMD = {
   BYE: 5,
   POSITION: 6,
   ALIVE: 7,
-  KILL: 8
+  KILL: 8,
+  PING: 9,
+  PONG: 10,
 };
 
 function getPlayerName (name, playerNumber) {
@@ -308,6 +310,21 @@ function init_server_peer () {
             return;
           }
 
+          const sendPing = () => {
+            if (playerId !== null) {
+              const newNetInfo = net_info();
+              newNetInfo[playerId].lastPinged = Date.now();
+              net_info(newNetInfo);
+            }
+
+            if (clientSock.open) {
+              sendPacketToSock(clientSock, { cmd: NETCMD.PING });
+            }
+            setTimeout(sendPing, 1500);
+          };
+
+          setTimeout(sendPing, 1500);
+
           clientSock.on('data', (packet) => {
 
             if (packet.cmd === NETCMD.HELLO) {
@@ -337,6 +354,14 @@ function init_server_peer () {
                 handleClientDisconnect(playerId, true);
                 playerId = null;
               });
+            }
+
+            if (packet.cmd === NETCMD.PONG && typeof playerId === 'number') {
+              console.log('got pong')
+              const newNetInfo = net_info();
+              newNetInfo[playerId].ping = Date.now() - newNetInfo[playerId].lastPinged;
+              net_info(newNetInfo);
+              return;
             }
 
             if (packet.cmd === NETCMD.BYE) {
@@ -423,7 +448,7 @@ export async function init_server (player_name) {
 
   for (let i = 0; i < env.JNB_MAX_PLAYERS; i++) {
     const newNetInfo = net_info();
-    newNetInfo[i] = { sock: null, socketset: [] };
+    newNetInfo[i] = { sock: null, socketset: [], ping: 0 };
     newNetInfo[client_player_num].name = getPlayerName(player_name, client_player_num);
     net_info(newNetInfo);
   }
@@ -482,6 +507,11 @@ export async function connect_to_server (server_id, player_name) {
     let receivedGreenlight = false;
 
     sock.on('data', (packet) => {
+      if (packet.cmd === NETCMD.PING) {
+        sendPacketToSock(sock, { cmd: NETCMD.PONG });
+        return;
+      }
+
       if (receivedAck && receivedGreenlight) {
         setTimeout(() => {
           socketset.push(packet);
